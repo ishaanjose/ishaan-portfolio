@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import profilePic from '../assets/profile_pic.jpeg';
+import profilePic from '../assets/image.png';
 
 const HeaderContainer = styled.header`
   width: 100%;
@@ -35,6 +35,7 @@ const TopSection = styled.div`
 const ProfileImage = styled.img`
   width: 100px;
   height: 100px;
+  object-fit: cover;
   border-radius: 50%;
   margin-bottom: 15px;
 `;

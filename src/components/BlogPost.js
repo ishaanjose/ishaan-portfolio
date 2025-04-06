@@ -1,103 +1,215 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import ReactMarkdown from 'react-markdown';
+import { FaArrowLeft, FaCalendarAlt } from 'react-icons/fa';
+
+// Add the same parseFrontMatter function from Blog.js
+const parseFrontMatter = (content) => {
+  const frontMatterRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
+  const match = frontMatterRegex.exec(content);
+  
+  if (!match) {
+    return { 
+      data: {}, 
+      content: content 
+    };
+  }
+  
+  const frontMatter = match[1];
+  const restContent = content.replace(match[0], '');
+  
+  // Parse the frontmatter into an object
+  const data = {};
+  frontMatter.split('\n').forEach(item => {
+    const [key, ...valueParts] = item.split(':');
+    if (key && valueParts.length) {
+      data[key.trim()] = valueParts.join(':').trim();
+    }
+  });
+  
+  return { 
+    data, 
+    content: restContent 
+  };
+};
 
 const BlogPostWrapper = styled.div`
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
+  padding: 40px 20px;
+`;
+
+const BackButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+  margin-bottom: 30px;
+  text-decoration: none;
+  
+  &:hover {
+    color: #3498db;
+  }
+`;
+
+const PostHeader = styled.div`
+  margin-bottom: 40px;
 `;
 
 const PostTitle = styled.h1`
-  font-size: 24px;
-  margin-bottom: 5px;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
 `;
 
-const PostDate = styled.p`
-  color: #888;
-  font-size: 14px;
+const PostDate = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
   margin-bottom: 20px;
 `;
 
 const PostImage = styled.img`
   width: 100%;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 30px;
 `;
 
 const PostContent = styled.div`
-  line-height: 1.6;
-
-  h2 {
-    font-size: 20px;
-    margin-top: 30px;
-    margin-bottom: 10px;
+  line-height: 1.8;
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
   }
-
-  h3 {
-    font-size: 18px;
-    margin-top: 25px;
-    margin-bottom: 10px;
-  }
-
+  
   p {
-    margin-bottom: 15px;
+    margin-bottom: 1.2em;
   }
-
+  
+  ul, ol {
+    margin-bottom: 1.2em;
+    padding-left: 1.5em;
+  }
+  
   a {
-    color: #0066cc;
+    color: #3498db;
     text-decoration: none;
+    
     &:hover {
       text-decoration: underline;
     }
   }
+  
+  blockquote {
+    border-left: 4px solid #ddd;
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+  }
+  
+  code {
+    background: #f5f5f5;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+  }
+  
+  pre {
+    background: #f5f5f5;
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+    
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #555;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #e74c3c;
 `;
 
 function BlogPost() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [error, setError] = useState(null);
+  
   useEffect(() => {
-    // Simulated API call or data fetching
     const fetchPost = async () => {
-      // In a real app, you'd fetch data based on the ID
-      // For now, we'll use a timeout to simulate an API call
-      setTimeout(() => {
-        const dummyPost = {
-          id: id,
-          title: 'Post with Photo',
-          date: 'Wednesday June 1, 2022',
-          image: 'https://example.com/path-to-leaf-image.jpg',
-          content: `
-            <p>This is a blog post example showcasing an image. You can conditionally show layers within your blog posts using Toggles. Here, the "Has Banner" Toggle is hooked up to the "Visibility" property, allowing you to define whether or not you want any given article to include a banner or not.</p>
-            <h2>H2 Heading</h2>
-            <p>This is a paragraph. Thai basil curry lime almonds green bowl Thai dragon pepper crispy cherries lentils red grapes grapefruit banana four-layer kung pao pepper cremini mushrooms Chinese five-spice powder chickpea crust pizza cherry bomb pepper tasty chia seeds. <a href="#">This is an inline link</a>.</p>
-            <h3>H3 Heading</h3>
-            <p>This is another paragraph. Thai basil curry lime almonds green bowl Thai dragon pepper...</p>
-          `
-        };
-        setPost(dummyPost);
+      try {
+        const response = await fetch(`/blog/${id}.md`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load blog post: ${response.status}`);
+        }
+        
+        const content = await response.text();
+        const { data, content: markdownContent } = parseFrontMatter(content);
+        
+        setPost({
+          title: data.title,
+          date: data.date,
+          image: data.image,
+          content: markdownContent
+        });
+      } catch (error) {
+        console.error('Error loading blog post:', error);
+        setError('Failed to load blog post. It might not exist or there was an error processing it.');
+      } finally {
         setLoading(false);
-      }, 500); // Simulate a 500ms delay
+      }
     };
-
+    
     fetchPost();
   }, [id]);
-
+  
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingMessage>Loading blog post...</LoadingMessage>;
   }
-
-  if (!post) {
-    return <div>Post not found</div>;
+  
+  if (error) {
+    return (
+      <BlogPostWrapper>
+        <BackButton to="/blog">
+          <FaArrowLeft /> Back to blog
+        </BackButton>
+        <ErrorMessage>{error}</ErrorMessage>
+      </BlogPostWrapper>
+    );
   }
-
+  
   return (
     <BlogPostWrapper>
-      <PostTitle>{post.title}</PostTitle>
-      <PostDate>{post.date}</PostDate>
-      {post.image && <PostImage src={post.image} alt={post.title} />}
-      <PostContent dangerouslySetInnerHTML={{ __html: post.content }} />
+      <BackButton to="/blog">
+        <FaArrowLeft /> Back to blog
+      </BackButton>
+      
+      <PostHeader>
+        <PostTitle>{post.title}</PostTitle>
+        <PostDate>
+          <FaCalendarAlt /> {post.date}
+        </PostDate>
+        <PostImage src={post.image} alt={post.title} />
+      </PostHeader>
+      
+      <PostContent>
+        <ReactMarkdown>{post.content}</ReactMarkdown>
+      </PostContent>
     </BlogPostWrapper>
   );
 }

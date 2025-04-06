@@ -1,7 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaImage, FaVideo, FaHeadphones, FaCode, FaFileAlt } from 'react-icons/fa';
+import { FaImage, FaVideo, FaHeadphones, FaCode, FaFileAlt, FaCalendarAlt } from 'react-icons/fa';
+
+// Add a date utility function at the top of your file
+const formatDate = (dateString) => {
+  try {
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if invalid
+    }
+    
+    // Format options for a cleaner presentation
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('en-US', options);
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return dateString; // Return original string if error
+  }
+};
+
+// Keep all your existing styled components
 
 const BlogWrapper = styled.div`
   max-width: 1200px;
@@ -25,6 +51,7 @@ const BlogPost = styled(Link)`
   color: inherit;
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   &:hover {
     transform: translateY(-5px);
@@ -40,6 +67,9 @@ const PostImage = styled.img`
 
 const PostContent = styled.div`
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 `;
 
 const PostTitle = styled.h2`
@@ -48,10 +78,27 @@ const PostTitle = styled.h2`
   color: #333;
 `;
 
+// Update the PostDate styled component
 const PostDate = styled.p`
   font-size: 0.9rem;
-  color: #777;
+  color: #666;
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    color: #888;
+    font-size: 14px;
+  }
+`;
+
+const PostExcerpt = styled.p`
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 16px;
+  line-height: 1.5;
+  flex-grow: 1;
 `;
 
 const PostIcon = styled.div`
@@ -60,63 +107,144 @@ const PostIcon = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: auto;
 `;
 
-const getPostIcon = (title) => {
-  if (title.includes('Photo')) return <FaImage />;
-  if (title.includes('Video')) return <FaVideo />;
-  if (title.includes('Audio')) return <FaHeadphones />;
-  if (title.includes('Code')) return <FaCode />;
-  return <FaFileAlt />;
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #555;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #e74c3c;
+`;
+
+
+// Simple function to parse frontmatter without using gray-matter
+const parseFrontMatter = (content) => {
+  const frontMatterRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
+  const match = frontMatterRegex.exec(content);
+  
+  if (!match) {
+    return { 
+      data: {}, 
+      content: content 
+    };
+  }
+  
+  const frontMatter = match[1];
+  const restContent = content.replace(match[0], '');
+  
+  // Parse the frontmatter into an object
+  const data = {};
+  frontMatter.split('\n').forEach(item => {
+    const [key, ...valueParts] = item.split(':');
+    if (key && valueParts.length) {
+      data[key.trim()] = valueParts.join(':').trim();
+    }
+  });
+  
+  return { 
+    data, 
+    content: restContent 
+  };
 };
 
 function Blog() {
-  const posts = [
-    { 
-      id: 1, 
-      title: 'Post with Photo', 
-      date: 'Wednesday June 1, 2022',
-      image: 'https://picsum.photos/seed/photo1/800/600'
-    },
-    { 
-      id: 2, 
-      title: 'Post with Video', 
-      date: 'Monday May 23, 2022',
-      image: 'https://picsum.photos/seed/video2/800/600'
-    },
-    { 
-      id: 3, 
-      title: 'Post with Audio', 
-      date: 'Wednesday May 18, 2022',
-      image: 'https://picsum.photos/seed/audio3/800/600'
-    },
-    { 
-      id: 4, 
-      title: 'Post with Code', 
-      date: 'Tuesday May 17, 2022',
-      image: 'https://picsum.photos/seed/code4/800/600'
-    },
-    { 
-      id: 5, 
-      title: 'Post with Text', 
-      date: 'Friday April 8, 2022',
-      image: 'https://picsum.photos/seed/text5/800/600'
-    },
-  ];
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const blogIds = ['1', '2']; // Add more IDs as you create more blog posts
+        
+        const postsData = await Promise.all(
+          blogIds.map(async (id, index) => {
+            try {
+              // Add some logging to debug issues
+              console.log(`Attempting to fetch blog post: ${window.location.origin}/blog/${id}.md`);
+              const response = await fetch(`/blog/${id}.md`);
+              
+              if (!response.ok) {
+                console.error(`Failed to load blog post ${id}: ${response.status}`);
+                return null;
+              }
+              
+              const content = await response.text();
+              console.log(`Successfully loaded blog post ${id}`);
+              
+              // Use our custom parser instead of gray-matter
+              const { data, content: markdownContent } = parseFrontMatter(content);
+              
+              return {
+                id: index + 1,
+                slug: id,
+                title: data.title || `Blog Post ${id}`,
+                date: data.date || 'No date',
+                image: data.image || 'https://picsum.photos/seed/default/800/600',
+                excerpt: data.excerpt || '',
+                type: data.type || 'Text',
+                content: markdownContent
+              };
+            } catch (err) {
+              console.error(`Error processing blog post ${id}:`, err);
+              return null;
+            }
+          })
+        );
+        
+        const validPosts = postsData.filter(post => post !== null);
+        
+        if (validPosts.length === 0) {
+          setError("No blog posts could be loaded. Please check that your Markdown files exist in the correct location (public/blog/*.md).");
+        } else {
+          validPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+          setPosts(validPosts);
+        }
+      } catch (error) {
+        console.error("Error loading blog posts:", error);
+        setError("Failed to load blog posts. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (loading) {
+    return <LoadingMessage>Loading blog posts...</LoadingMessage>;
+  }
+
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
+  }
+
+  if (posts.length === 0) {
+    return <ErrorMessage>No blog posts found.</ErrorMessage>;
+  }
 
   return (
     <BlogWrapper>
       <BlogGrid>
         {posts.map(post => (
-          <BlogPost key={post.id} to={`/blog/${post.id}`}>
+          <BlogPost key={post.id} to={`/blog/${post.slug}`}>
             <PostImage src={post.image} alt={post.title} />
             <PostContent>
               <PostTitle>{post.title}</PostTitle>
-              <PostDate>{post.date}</PostDate>
-              <PostIcon>
-                {getPostIcon(post.title)}
-                <span>{post.title.split(' ').pop()}</span>
-              </PostIcon>
+              <PostDate>
+                <FaCalendarAlt />
+                {formatDate(post.date)}
+              </PostDate>
+              <PostExcerpt>{post.excerpt}</PostExcerpt>
+
             </PostContent>
           </BlogPost>
         ))}

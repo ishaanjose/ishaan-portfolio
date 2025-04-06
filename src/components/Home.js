@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
-import { FaSyncAlt, FaPython, FaJs } from "react-icons/fa";
+import { FaSyncAlt, FaPython, FaJs, FaReact } from "react-icons/fa";
 import { DiJava } from "react-icons/di";
 import FlagIcon from 'react-flagkit';
 
@@ -178,6 +178,7 @@ function Home() {
           <SkillIcon><FaPython /></SkillIcon>
           <SkillIcon><DiJava /></SkillIcon> 
           <SkillIcon><FaJs /></SkillIcon>
+          <SkillIcon><FaReact /></SkillIcon>
         </SkillsSection>
         <FlagsSection>
           <FlagIconWrapper>
