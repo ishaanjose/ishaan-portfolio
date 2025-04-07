@@ -101,14 +101,6 @@ const PostExcerpt = styled.p`
   flex-grow: 1;
 `;
 
-const PostIcon = styled.div`
-  font-size: 1.2rem;
-  color: #3498db;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-`;
 
 const LoadingMessage = styled.div`
   text-align: center;

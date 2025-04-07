@@ -9,24 +9,7 @@ const Container = styled.div`
   padding: 40px 20px;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 32px;
-  font-weight: 500;
-  margin-bottom: 40px;
-  color: #222;
-  position: relative;
-  display: inline-block;
-  
-  &:after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 40px;
-    height: 3px;
-    background: #222;
-  }
-`;
+
 
 const EducationContainer = styled.div`
   position: relative;
