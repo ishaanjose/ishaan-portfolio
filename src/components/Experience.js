@@ -82,6 +82,14 @@ const CardHeader = styled.div`
     width: 280px;
     flex-shrink: 0;
   }
+  
+  @media (max-width: 767px) {
+    padding: 20px;
+    border-right: none;
+    border-bottom: 1px solid #eaeaea;
+    display: flex;
+    flex-wrap: wrap;
+  }
 `;
 
 const Company = styled.h3`
@@ -121,6 +129,13 @@ const MetaInfo = styled.div`
       font-size: 13px;
       opacity: 0.7;
     }
+  }
+  
+  @media (max-width: 767px) {
+    flex-direction: row;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
   }
 `;
 

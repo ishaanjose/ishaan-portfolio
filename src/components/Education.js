@@ -9,8 +9,6 @@ const Container = styled.div`
   padding: 40px 20px;
 `;
 
-
-
 const EducationContainer = styled.div`
   position: relative;
 `;
@@ -21,6 +19,7 @@ const TabsContainer = styled.div`
   margin-bottom: 30px;
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   
   &::-webkit-scrollbar {
     display: none;
@@ -28,6 +27,8 @@ const TabsContainer = styled.div`
   
   @media (max-width: 768px) {
     justify-content: flex-start;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
   }
 `;
 
@@ -58,6 +59,13 @@ const TabButton = styled.button`
   &:hover {
     color: #000;
   }
+  
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+    font-size: 14px;
+    min-width: 120px; /* Ensure minimum touch target size */
+    text-align: center;
+  }
 `;
 
 const CardContainer = styled(motion.div)`
@@ -82,6 +90,10 @@ const CardHeader = styled.div`
   @media (min-width: 768px) {
     width: 280px;
     flex-shrink: 0;
+  }
+  
+  @media (max-width: 767px) {
+    padding: 20px;
   }
 `;
 
