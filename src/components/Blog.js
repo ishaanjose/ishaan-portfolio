@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaImage, FaVideo, FaHeadphones, FaCode, FaFileAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaCalendarAlt } from 'react-icons/fa';
 
 // Add a date utility function at the top of your file
 const formatDate = (dateString) => {
