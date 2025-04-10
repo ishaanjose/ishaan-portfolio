@@ -24,7 +24,9 @@ const ContentWrapper = styled.main`
   padding: 40px 20px;
 
   @media (max-width: 768px) {
-    padding: 20px 10px;
+    padding: 20px 10px; /* Reduced padding to maximize width */
+    overflow-x: hidden; /* Prevent horizontal scroll issues */
+    width: 100%;
   }
 `;
 
@@ -35,7 +37,8 @@ const PageContainer = styled(motion.div)`
   padding: 30px;
   
   @media (max-width: 768px) {
-    padding: 20px;
+    padding: 20px 15px;
+    border-radius: 6px;
   }
 `;
 

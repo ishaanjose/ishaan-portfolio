@@ -2,145 +2,237 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import profilePic from '../assets/image.png';
+import { AnimatePresence, motion } from 'framer-motion';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
-const HeaderContainer = styled.header`
-  width: 100%;
-  background: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+const HeaderWrapper = styled.div`
   position: sticky;
   top: 0;
+  width: 100%;
   z-index: 1000;
-  height: ${props => props.isScrolled ? '100px' : '250px'};
-  transition: height 0.3s ease;
-  
-  @media (max-width: 768px) {
-    height: ${props => props.isScrolled ? '70px' : '180px'};
-  }
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.85);
 `;
 
-const HeaderContent = styled.div`
+const HeaderContainer = styled.header`
   max-width: 1200px;
   margin: 0 auto;
-  height: 100%;
+  padding: 1.5rem;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  padding: ${props => props.isScrolled ? '10px 0 0 0' : '40px 0 0 0'};
-  box-sizing: border-box;
-  transition: padding 0.3s ease;
-  
-  @media (max-width: 768px) {
-    padding: ${props => props.isScrolled ? '5px 0 0 0' : '20px 0 0 0'};
-  }
 `;
 
-const TopSection = styled.div`
+const Logo = styled(Link)`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  flex: 1;
-  width: 100%;
+  text-decoration: none;
+  gap: 1rem;
 `;
 
 const ProfileImage = styled.img`
-  width: ${props => props.isScrolled ? '60px' : '100px'};
-  height: ${props => props.isScrolled ? '60px' : '100px'};
-  object-fit: cover;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  margin-bottom: ${props => props.isScrolled ? '5px' : '15px'};
-  transition: all 0.3s ease;
-  
-  @media (max-width: 768px) {
-    width: ${props => props.isScrolled ? '40px' : '70px'};
-    height: ${props => props.isScrolled ? '40px' : '70px'};
-  }
+  object-fit: cover;
 `;
 
 const Name = styled.h1`
-  font-size: 32px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #111;
   margin: 0;
-  color: #333;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  opacity: ${props => props.isScrolled ? '0' : '1'};
-  transform: translateY(${props => props.isScrolled ? '-10px' : '0'});
-  height: ${props => props.isScrolled ? '0' : 'auto'};
-  overflow: hidden;
   
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 1.125rem;
   }
 `;
 
-const Navigation = styled.nav`
+const NavLinks = styled.nav`
   display: flex;
-  justify-content: center;
-  gap: 40px;
-  width: 100%;
-  padding: ${props => props.isScrolled ? '10px 0' : '20px 0'};
-  transition: padding 0.3s ease;
+  gap: 2.5rem;
   
   @media (max-width: 768px) {
-    gap: 15px;
-    padding: 5px 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    padding-left: 10px;
+    display: none;
+  }
+`;
+
+const NavLink = styled(Link)`
+  position: relative;
+  font-size: 1rem;
+  text-decoration: none;
+  color: ${props => props.$active ? '#111' : '#666'};
+  font-weight: ${props => props.$active ? '500' : '400'};
+  padding-bottom: 2px;
+  transition: color 0.3s ease;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: ${props => props.$active ? '100%' : '0'};
+    height: 1px;
+    background-color: #111;
+    transition: width 0.3s ease;
+  }
+  
+  &:hover {
+    color: #111;
     
-    &::-webkit-scrollbar {
-      display: none;
+    &::after {
+      width: 100%;
     }
   }
 `;
 
-const NavItem = styled(Link)`
-  font-size: ${props => props.$isScrolled ? '15px' : '17px'};
-  text-decoration: none;
-  color: ${props => props.$active ? '#007bff' : '#666'};
-  padding: 5px 0;
-  border-bottom: 2px solid ${props => props.$active ? '#007bff' : 'transparent'};
-  transition: all 0.2s ease;
-  white-space: nowrap;
-
-  &:hover {
-    color: #007bff;
-  }
+const MobileMenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #111;
+  cursor: pointer;
   
   @media (max-width: 768px) {
-    font-size: ${props => props.$isScrolled ? '12px' : '14px'};
-    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
   }
+`;
+
+const MobileNavWrapper = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1001;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+`;
+
+const MobileNavHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+`;
+
+const MobileNavLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 3rem;
+`;
+
+const MobileNavLink = styled(Link)`
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: ${props => props.$active ? '#111' : '#666'};
+  font-weight: ${props => props.$active ? '500' : '400'};
 `;
 
 function Header() {
   const location = useLocation();
   const path = location.pathname;
-  const [isScrolled, setIsScrolled] = useState(false);
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Disable body scroll when mobile menu is open
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  }, [mobileMenuOpen]);
+  
   return (
-    <HeaderContainer isScrolled={isScrolled}>
-      <HeaderContent isScrolled={isScrolled}>
-        <TopSection>
-          <ProfileImage src={profilePic} alt="Profile" isScrolled={isScrolled} />
-          <Name isScrolled={isScrolled}>Ishaan Jose</Name>
-        </TopSection>
-        <Navigation isScrolled={isScrolled}>
-          <NavItem to="/" $active={path === '/'} $isScrolled={isScrolled}>About</NavItem>
-          <NavItem to="/blog" $active={path === '/blog'} $isScrolled={isScrolled}>Blog</NavItem>
-          <NavItem to="/experience" $active={path === '/experience'} $isScrolled={isScrolled}>Experience</NavItem>
-          <NavItem to="/education" $active={path === '/education'} $isScrolled={isScrolled}>Education</NavItem>
-        </Navigation>
-      </HeaderContent>
-    </HeaderContainer>
+    <HeaderWrapper>
+      <HeaderContainer>
+        <Logo to="/">
+          <ProfileImage src={profilePic} alt="Ishaan Jose" />
+          <Name>Ishaan Jose</Name>
+        </Logo>
+        
+        <NavLinks>
+          <NavLink to="/" $active={path === '/'}>About</NavLink>
+          <NavLink to="/blog" $active={path === '/blog'}>Blog</NavLink>
+          <NavLink to="/experience" $active={path === '/experience'}>Experience</NavLink>
+          <NavLink to="/education" $active={path === '/education'}>Education</NavLink>
+        </NavLinks>
+        
+        <MobileMenuButton 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </MobileMenuButton>
+      </HeaderContainer>
+      
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <MobileNavWrapper
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            <MobileNavHeader>
+              <Logo to="/" onClick={() => setMobileMenuOpen(false)}>
+                <ProfileImage src={profilePic} alt="Ishaan Jose" />
+                <Name>Ishaan Jose</Name>
+              </Logo>
+              <MobileMenuButton 
+                onClick={() => setMobileMenuOpen(false)} 
+                aria-label="Close menu"
+              >
+                <FaTimes />
+              </MobileMenuButton>
+            </MobileNavHeader>
+            
+            <MobileNavLinks>
+              <MobileNavLink 
+                to="/" 
+                $active={path === '/'} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </MobileNavLink>
+              <MobileNavLink 
+                to="/blog" 
+                $active={path === '/blog'} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Blog
+              </MobileNavLink>
+              <MobileNavLink 
+                to="/experience" 
+                $active={path === '/experience'} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Experience
+              </MobileNavLink>
+              <MobileNavLink 
+                to="/education" 
+                $active={path === '/education'} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Education
+              </MobileNavLink>
+            </MobileNavLinks>
+          </MobileNavWrapper>
+        )}
+      </AnimatePresence>
+    </HeaderWrapper>
   );
 }
 
