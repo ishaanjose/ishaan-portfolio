@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaBriefcase, FaCalendarAlt, FaMapMarkerAlt, FaLongArrowAltRight } from 'react-icons/fa';
+import { useSwipeable } from 'react-swipeable';
+import { FaBriefcase, FaCalendarAlt, FaMapMarkerAlt, FaLongArrowAltRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const Container = styled.div`
   max-width: 1100px;
   margin: 0 auto;
   padding: 40px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 30px 15px;
+  }
 `;
-
 
 const ExperienceContainer = styled.div`
   position: relative;
@@ -27,6 +31,8 @@ const TabsContainer = styled.div`
   
   @media (max-width: 768px) {
     justify-content: flex-start;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
   }
 `;
 
@@ -59,17 +65,43 @@ const TabButton = styled.button`
   }
 `;
 
+const SwipeIndicator = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    color: #888;
+    font-size: 13px;
+    gap: 8px;
+    
+    svg {
+      animation: swipeHint 1.5s infinite;
+    }
+    
+    @keyframes swipeHint {
+      0% { transform: translateX(0); opacity: 0.5; }
+      50% { transform: translateX(10px); opacity: 1; }
+      100% { transform: translateX(0); opacity: 0.5; }
+    }
+  }
+`;
+
 const CardContainer = styled(motion.div)`
   display: flex;
   flex-direction: column;
   background: white;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 
   @media (min-width: 768px) {
     flex-direction: row;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -203,8 +235,64 @@ const NavButton = styled.button`
   }
 `;
 
+const MobileNavArrows = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 10;
+    pointer-events: none;
+  }
+`;
+
+const NavArrow = styled.button`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  color: #333;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: ${props => props.disabled ? 0.3 : 1};
+  
+  &:active {
+    background: #f8f8f8;
+  }
+`;
+
+const ProgressIndicator = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+`;
+
+const ProgressDot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.active ? '#007bff' : '#ddd'};
+  transition: background 0.3s ease;
+`;
+
 function Experience() {
     const [activeTab, setActiveTab] = useState(0);
+    const [showSwipeHint, setShowSwipeHint] = useState(true);
 
     const experiences = [
         {
@@ -286,14 +374,34 @@ function Experience() {
             skills: ['React', 'Node.js', 'Full Stack', 'UI/UX', 'Web Development']
         }
     ];
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setShowSwipeHint(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }, []);
     
     const navigatePrev = () => {
-        setActiveTab(prev => (prev === 0 ? prev : prev - 1));
+        if (activeTab > 0) {
+          setActiveTab(prev => prev - 1);
+          setShowSwipeHint(false);
+        }
     };
     
     const navigateNext = () => {
-        setActiveTab(prev => (prev === experiences.length - 1 ? prev : prev + 1));
+        if (activeTab < experiences.length - 1) {
+          setActiveTab(prev => prev + 1);
+          setShowSwipeHint(false);
+        }
     };
+    
+    const swipeHandlers = useSwipeable({
+      onSwipedLeft: () => navigateNext(),
+      onSwipedRight: () => navigatePrev(),
+      trackMouse: false
+    });
 
     return (
         <Container>            
@@ -309,7 +417,15 @@ function Experience() {
                 ))}
             </TabsContainer>
             
-            <ExperienceContainer>
+            {showSwipeHint && (
+                <SwipeIndicator>
+                    <FaChevronLeft />
+                    Swipe to navigate
+                    <FaChevronRight />
+                </SwipeIndicator>
+            )}
+            
+            <ExperienceContainer {...swipeHandlers}>
                 <AnimatePresence mode="wait">
                     <CardContainer
                         key={activeTab}
@@ -349,6 +465,27 @@ function Experience() {
                         </CardContent>
                     </CardContainer>
                 </AnimatePresence>
+                
+                <MobileNavArrows>
+                    <NavArrow 
+                        onClick={navigatePrev} 
+                        disabled={activeTab === 0}
+                    >
+                        <FaChevronLeft />
+                    </NavArrow>
+                    <NavArrow 
+                        onClick={navigateNext}
+                        disabled={activeTab === experiences.length - 1}
+                    >
+                        <FaChevronRight />
+                    </NavArrow>
+                </MobileNavArrows>
+                
+                <ProgressIndicator>
+                    {experiences.map((_, index) => (
+                        <ProgressDot key={index} active={activeTab === index} />
+                    ))}
+                </ProgressIndicator>
                 
                 <NavButtons>
                     <NavButton 

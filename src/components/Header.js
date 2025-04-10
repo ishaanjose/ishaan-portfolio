@@ -14,7 +14,7 @@ const HeaderContainer = styled.header`
   transition: height 0.3s ease;
   
   @media (max-width: 768px) {
-    height: ${props => props.isScrolled ? '80px' : '200px'};
+    height: ${props => props.isScrolled ? '70px' : '180px'};
   }
 `;
 
@@ -30,7 +30,7 @@ const HeaderContent = styled.div`
   transition: padding 0.3s ease;
   
   @media (max-width: 768px) {
-    padding: ${props => props.isScrolled ? '10px 0 0 0' : '25px 0 0 0'};
+    padding: ${props => props.isScrolled ? '5px 0 0 0' : '20px 0 0 0'};
   }
 `;
 
@@ -51,8 +51,8 @@ const ProfileImage = styled.img`
   transition: all 0.3s ease;
   
   @media (max-width: 768px) {
-    width: ${props => props.isScrolled ? '50px' : '80px'};
-    height: ${props => props.isScrolled ? '50px' : '80px'};
+    width: ${props => props.isScrolled ? '40px' : '70px'};
+    height: ${props => props.isScrolled ? '40px' : '70px'};
   }
 `;
 
@@ -67,7 +67,7 @@ const Name = styled.h1`
   overflow: hidden;
   
   @media (max-width: 768px) {
-    font-size: 28px;
+    font-size: 24px;
   }
 `;
 
@@ -80,12 +80,12 @@ const Navigation = styled.nav`
   transition: padding 0.3s ease;
   
   @media (max-width: 768px) {
-    gap: 20px;
-    padding: 10px 0;
+    gap: 15px;
+    padding: 5px 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     justify-content: flex-start;
-    padding-left: 20px;
+    padding-left: 10px;
     
     &::-webkit-scrollbar {
       display: none;
@@ -107,8 +107,8 @@ const NavItem = styled(Link)`
   }
   
   @media (max-width: 768px) {
-    font-size: ${props => props.$isScrolled ? '13px' : '15px'};
-    padding: 8px 0;
+    font-size: ${props => props.$isScrolled ? '12px' : '14px'};
+    padding: 6px 0;
   }
 `;
 

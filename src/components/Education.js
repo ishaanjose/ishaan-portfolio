@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGraduationCap, FaCalendarAlt, FaMapMarkerAlt, FaLongArrowAltRight } from 'react-icons/fa';
+import { useSwipeable } from 'react-swipeable';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const Container = styled.div`
   max-width: 1100px;
@@ -261,8 +263,15 @@ function Education() {
         setActiveTab(prev => (prev === educationItems.length - 1 ? prev : prev + 1));
     };
 
+    const swipeHandlers = useSwipeable({
+        onSwipedLeft: () => navigateNext(),
+        onSwipedRight: () => navigatePrev(),
+        preventDefaultTouchmoveEvent: true,
+        trackMouse: true
+    });
+
     return (
-        <Container>
+        <Container {...swipeHandlers}>
             
             <TabsContainer>
                 {educationItems.map((edu, index) => (
@@ -323,7 +332,7 @@ function Education() {
                         onClick={navigatePrev} 
                         disabled={activeTab === 0}
                     >
-                        <FaLongArrowAltRight style={{ transform: 'rotate(180deg)' }} />
+                        <FaChevronLeft />
                         Previous
                     </NavButton>
                     <NavButton 
@@ -331,7 +340,7 @@ function Education() {
                         disabled={activeTab === educationItems.length - 1}
                     >
                         Next
-                        <FaLongArrowAltRight />
+                        <FaChevronRight />
                     </NavButton>
                 </NavButtons>
             </EducationContainer>
