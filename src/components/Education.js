@@ -71,6 +71,7 @@ const TabButton = styled.button`
 
 const EducationContainer = styled.div`
   position: relative;
+  touch-action: pan-y; /* Allow vertical scrolling but not horizontal */
 `;
 
 const CardContainer = styled(motion.div)`
@@ -448,7 +449,10 @@ function Education() {
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => navigateNext(),
     onSwipedRight: () => navigatePrev(),
-    trackMouse: false
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: false,
+    delta: 50,  // Increase minimum swipe distance (pixels)
+    swipeDuration: 500  // Allow more time to complete a swipe (ms)
   });
 
   return (
@@ -467,7 +471,6 @@ function Education() {
 
       {showSwipeHint && (
         <SwipeIndicator>
-          <span>Card {activeTab + 1} of {educations.length}: <strong>{educations[activeTab].school}</strong></span>
           <div>
             <FaChevronLeft />
             Swipe to navigate

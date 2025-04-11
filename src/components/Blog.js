@@ -33,12 +33,26 @@ const BlogWrapper = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 30px 15px;
+    /* Remove display: flex - this is causing the misalignment */
+  }
 `;
 
 const BlogGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 30px;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 20px;
+    max-width: 450px; /* Limit max width on mobile */
+    width: 100%;
+    margin: 0 auto; /* THIS is the key change - center using margin auto */
+  }
 `;
 
 const BlogPost = styled(Link)`
@@ -52,7 +66,7 @@ const BlogPost = styled(Link)`
   display: flex;
   flex-direction: column;
   height: 100%;
-
+  
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -63,6 +77,10 @@ const PostImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
+  
+  @media (max-width: 768px) {
+    height: 180px; /* Slightly shorter on mobile */
+  }
 `;
 
 const PostContent = styled.div`
