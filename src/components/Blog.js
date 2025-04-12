@@ -173,7 +173,7 @@ function Blog() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const blogIds = ['1', '2']; // Add more IDs as you create more blog posts
+        const blogIds = ['1']; // Add more IDs as you create more blog posts
         
         const postsData = await Promise.all(
           blogIds.map(async (id, index) => {
